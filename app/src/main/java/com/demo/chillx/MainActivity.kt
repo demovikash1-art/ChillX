@@ -302,8 +302,7 @@ fun ChillXApp() {
                     }
                 }
             }
-
-            "QR" -> LazyColumn(
+                        "QR" -> LazyColumn(
                 Modifier.fillMaxSize().background(PageBg).padding(pad).padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -324,4 +323,107 @@ fun ChillXApp() {
                                     val g = 9; val c = size.width / g
                                     for (r in 0 until g) for (col in 0 until g) {
                                         if ((r < 3 && col < 3) || (r < 3 && col > 5) || (r > 5 && col < 3) || ((r + col) % 2 == 0 && (r * col) % 3 != 0)) {
-                                            drawRect(Navy, Offset(col * c + 2f, r * c + 2f),
+                                            drawRect(Navy, Offset(col * c + 2f, r * c + 2f), Size(c - 4f, c - 4f))
+                                        }
+                                    }
+                                }
+                                Box(Modifier.background(Color.White, RoundedCornerShape(8.dp)).border(1.5.dp, RedAlert, RoundedCornerShape(8.dp)).padding(horizontal = 10.dp, vertical = 4.dp)) {
+                                    Text("SAMPLE", color = RedAlert, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
+                                }
+                            }
+                            Spacer(Modifier.height(12.dp))
+                            Text("ID: CHILLX-SAMPLE-PREVIEW", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextMuted)
+                        }
+                    }
+                }
+                item {
+                    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(if (isHi) "महत्वपूर्ण जानकारी" else "Demo Information", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Navy)
+                            Text(
+                                if (isHi) "• यह स्क्रीन केवल UI प्रीव्यू और गणितीय गणना के लिए है।\n• ऊपर दिया गया QR कोड स्कैन नहीं होता और न ही किसी बैंक से जुड़ा है।\n• कोई वास्तविक पैसा जमा या ट्रांसफर नहीं होता।"
+                                else "• Strictly for UI preview and mathematical illustration.\n• The QR graphic is non-scannable and not linked to any bank or UPI ID.\n• No real money or financial returns are processed.",
+                                fontSize = 14.sp, color = TextDark, lineHeight = 20.sp
+                            )
+                        }
+                    }
+                }
+            }
+
+            "PROFILE" -> {
+                var eName by remember { mutableStateOf(name) }
+                var eCity by remember { mutableStateOf(city) }
+                var eHandle by remember { mutableStateOf(handle) }
+                Column(Modifier.fillMaxSize().background(PageBg).padding(pad).padding(16.dp)) {
+                    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                        Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Box(Modifier.size(68.dp).background(Navy, CircleShape), contentAlignment = Alignment.Center) {
+                                Text(eName.firstOrNull()?.uppercase() ?: "V", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                            }
+                            Text("Chill𝕏 Member Profile", fontWeight = FontWeight.Bold, fontSize = 17.sp)
+                            OutlinedTextField(eName, { eName = it }, label = { Text("Display Name") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                            OutlinedTextField(eHandle, { eHandle = it }, label = { Text("Username") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                            OutlinedTextField(eCity, { eCity = it }, label = { Text("City / Region") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                            Button(
+                                onClick = {
+                                    name = eName.ifBlank { "Vikash" }; handle = eHandle.ifBlank { "@vikash_cx" }; city = eCity.ifBlank { "India" }; save()
+                                    alertMsg = if (isHi) "प्रोफ़ाइल सेव हो गई!" else "Profile saved locally!"
+                                },
+                                modifier = Modifier.fillMaxWidth().height(50.dp), colors = ButtonDefaults.buttonColors(containerColor = Green), shape = RoundedCornerShape(12.dp)
+                            ) { Text("Save Profile", fontSize = 16.sp, fontWeight = FontWeight.Bold) }
+                        }
+                    }
+                }
+            }
+
+            else -> LazyColumn(Modifier.fillMaxSize().background(PageBg).padding(pad).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                item {
+                    val t = menus.find { it.id == screen }?.let { if (isHi) it.hi else it.en } ?: screen
+                    Text(t, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Navy)
+                }
+                when (screen) {
+                    "DASHBOARD" -> item { InfoBox("Summary", "Member: $name ($handle)\nCity: $city\nSample Balance: ${inr(balance)}\nLogged Previews: ${history.size}") }
+                    "TRACKER" -> items((1..30).toList()) { d ->
+                        Card(shape = RoundedCornerShape(10.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                            Row(Modifier.fillMaxWidth().padding(14.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text("Day $d", fontWeight = FontWeight.Bold)
+                                Text(if (d <= history.size) "Completed ✓" else "Scheduled", color = if (d <= history.size) Green else TextMuted, fontWeight = FontWeight.SemiBold)
+                            }
+                        }
+                    }
+                    "HISTORY" -> items(history) { h ->
+                        Card(shape = RoundedCornerShape(10.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                            Text(h, Modifier.padding(14.dp), fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+                    "NOTIFICATIONS" -> item { InfoBox("Chill𝕏 Updates", "• Welcome to Chill𝕏!\n• All balances, QR cards, and 50% calculations are non-financial illustrative previews.") }
+                    "HELP" -> item { InfoBox("Help & Support", "1. Enter any amount or tap a preset card.\n2. Check the instant 50% mathematical example.\n3. Tap OK to view the sample QR card.\n4. Use Reset Demo Data anytime to clear local entries.") }
+                    "FAQ" -> item { InfoBox("FAQ", "Q: Is this a real payment app?\nA: No, Chill𝕏 is strictly a non-financial demo app.\n\nQ: Can the QR code be scanned?\nA: No, it is a non-scannable sample placeholder.") }
+                    "FEEDBACK" -> item {
+                        Card(shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                OutlinedTextField(feedback, { feedback = it }, placeholder = { Text("Write feedback...") }, modifier = Modifier.fillMaxWidth().height(110.dp))
+                                Button(onClick = { if (feedback.isNotBlank()) { feedback = ""; alertMsg = "Feedback saved!" } }, Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Navy)) {
+                                    Text("Submit")
+                                }
+                            }
+                        }
+                    }
+                    "PRIVACY" -> item { InfoBox("Privacy Policy", "• No real bank details, UPI PINs, or contacts are collected.\n• All settings and sample history stay locally on your device.\n• Tap 'Reset Demo Data' anytime to wipe local data.") }
+                    "TERMS" -> item { InfoBox("Terms & Conditions", "• Strictly for UI preview and mathematical illustration.\n• No real money, deposits, or withdrawals occur.\n• The 50% figure is a math example only, not a financial return.") }
+                    "ABOUT" -> item { InfoBox("About Chill𝕏 v1.0", "Built with Kotlin & Jetpack Compose. Includes live 50% math illustration, local profile & history storage, and Hindi/English support.") }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun InfoBox(title: String, text: String) {
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(title, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Navy)
+            Text(text, fontSize = 14.sp, color = TextDark, lineHeight = 20.sp)
+        }
+    }
+}
